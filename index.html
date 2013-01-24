@@ -1,82 +1,30 @@
-<HTML>
-<HEAD>
-<TITLE>Assignment 3</TITLE>
-</HEAD>
-<BODY STYLE="FONT-FAMILY: monospace;">
+<!DOCTYPE html>
 
-<PRE>
-Elijah Newman-Gomez
-CSE 594 Winter 2013 Turner
-Assignment 3
-
-Description:
-Create a base class ACTOR with some properties that a child class NPC can inherit or override.
-
-See source code for testing details.
-
-</PRE>
+<pre>Purpose:
+Experiment with passing a non-member function a *this* pointer with the function call method.
+Also test out the assert function and understand how it works.
+</pre>
 
 <HR>
 
-<PRE>
+<script src="assert.js"></script>
 
-<SCRIPT>
+<script>
 
-// Base class for Actor
-function Actor(){ }
+var actor = new Object;
 
-// Set some of Actor's properties
-Actor.prototype = { x: 0, y: 0 };
+function Kill()
+	this.health = 0;
 
-// Could also set them this way...
-Actor.prototype.z = 0;
+Kill.call(actor);
 
+assert(actor.health === 0);
 
-// Create an instance of this class
-var Mike = new Actor();
+function Heal()
+	this.health = 100;
 
-if( Mike.x == 0 )
-	document.write("Mike.x is 0, inherited from Actor prototype.\n");
+Heal.call(actor);
 
-if( !Mike.hasOwnProperty("x") )
-	document.write("Mike has NO property X of its own, only the inherited one.\n");
+assert(actor.health === 100);
 
-
-// Now try overriding a property
-Mike.x = 7;
-
-if( Mike.x == 7 )
-	document.write("Mike.x is 7, overriden from Actor prototype.\n");
-
-if( Mike.hasOwnProperty("x") )
-	document.write("Mike has property X of its own now.\n");
-
-
-// Now try removing the property from Mike
-delete Mike.x;
-
-if( Mike.x == 0 )
-	document.write("Mike.x is 0 again because it is no longer overridden.\n");
-
-
-// Now create a child class NPC that inherits from Actor and also adds some new properties
-function NPC(){ }
-
-// Set some of NPC's unique properties
-NPC.prototype = new Actor();
-NPC.prototype.IsScared = true;
-
-var John = new NPC();
-
-if( John.IsScared )
-	document.write("John has its new property.\n");
-
-if( John.x == 0 )
-	document.write("John has the property X inherieted from Actor.\n");
-
-</SCRIPT>
-
-</PRE>
-
-</BODY>
-</HTML>
+</script>
