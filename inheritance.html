@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<p>
+Purpose:<br>
+Experiment with how functions and properties are inherited and expand functionality by manipulating prototypes.
+</p>
+
+<p>
+View source to see tests.
+</p>
+
+<hr>
+
+<script src="assert.js"></script>
+
+<script>
+
+/////////////////////////////////////////////
+//
+// Alternative 1 (classical inheritance)
+
+function A(x) {
+this.x = x;
+}
+
+// Add methods to A through its prototype property
+// (functions are their own prototype)
+A.prototype.addToX = function(dx) {
+this.x += dx;
+};
+
+function B(x, y) {
+A.call(this, x);		// Call our soon-to-be parent's constructor as well
+this.y = y;
+}
+
+// To inherit the methods of A, we make a NEW instace of it.
+// This way we can extend B.prototype even further without modifying
+// everything else that inherits from A.prototype.
+B.prototype = new A(0);
+
+// Modifies an INSTANCE of A.prototype, not the A.prototype object itself
+B.prototype.addToY = function(dy) {
+this.y += dy;
+};
+
+var a = new A(3);		// a's __proto__ is A.prototype and has no addToY method
+assert(a.x === 3);
+a.addToX(1);
+assert(a.x === 4);
+
+var b = new B(13, 17);	// b's __proto__ is a modified instance of A.prototype and has the addToY method added
+assert(b.x === 13);
+assert(b.y === 17);
+b.addToX(1);
+assert(b.x === 14);
+b.addToY(1);
+assert(b.y === 18);
+
+
+/////////////////////////////////////////////
+//
+// Alternative 2 (sharing functions)
+
+function A2(x) {
+this.x = x;
+};
+
+function B2(x, y) {
+A2.call(this, x); // or this.x = x;
+this.y = y;
+};
+
+(function() {
+
+// Define the functions that are to be shared
+var addToX = function(dx) {
+this.x += dx;
+};
+
+var addToY = function(dy) {
+this.y += dy;
+};
+
+// Set some pointers where they should be used
+A2.prototype.addToX = addToX;
+
+B2.prototype.addToX = addToX;
+B2.prototype.addToY = addToY;
+})();
+
+var a2 = new A2(3);
+assert(a2.x === 3);
+a2.addToX(1);
+assert(a2.x === 4);
+
+var b2 = new B2(13, 17);
+assert(b2.x === 13);
+assert(b2.y === 17);
+b2.addToX(1);
+assert(b2.x === 14);
+b2.addToY(1);
+assert(b2.y === 18);
+
+
+/////////////////////////////////////////////
+//
+// Alternative 3 (composition)
+
+function A3(x) {
+this.x = x;
+};
+
+A3.prototype.addToX = function(dx) {
+this.x += dx;
+};
+
+function B3(a, y) {
+this.a = a;			// A pointer to an A3 object
+this.y = y;
+};
+
+B3.prototype.addToY = function(dy) {
+this.y += dy;
+};
+
+var a3 = new A3(3);
+assert(a3.x === 3);
+a3.addToX(1);
+assert(a3.x === 4);
+
+var b3 = new B3(new A3(13), 17);
+assert(b3.a.x === 13);			// Strange syntax, but would allow for B3 objects to have their own x property seperately too
+assert(b3.y === 17);
+b3.a.addToX(1);
+assert(b3.a.x === 14);
+b3.addToY(1);
+assert(b3.y === 18);
+
+
+</script>

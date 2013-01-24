@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<p>Purpose:<BR>
+Understand prototypes, constructors, and how to extend the funcntionality of many objects at once by extending the object their __proto__ property points to.
+</p>
+
+<p>
+View source to see tests.
+</p>
+
+<HR>
+
+<script src="assert.js"></script>
+
+<script>
+
+var a = {};
+
+assert(typeof a === 'object');		// This is an object.
+
+assert(typeof Object.getPrototypeOf(a) === 'object');	// The default object prototype
+assert(a.__proto__ === Object.getPrototypeOf(a));	// The actual prototype matches the function's prototype property (at this time)
+
+assert(typeof a.this_does_not_exist !== 'object');
+assert(typeof a.this_does_not_exist === 'undefined');
+
+assert(a.constructor === Object);		// The constructor exists & is an object
+assert(typeof a.constructor === 'function');
+assert(typeof a.constructor.prototype === 'object');
+assert(a.constructor.prototype === a.__proto__);	// Because the constructor's prototype property is assigned & used on objects that it creates
+
+// When a primitive is asked for it’s prototype it will be coerced to an object.
+assert(false.__proto__ === Boolean(false).__proto__);
+
+// Everything that is not a function does not have a prototype property.
+assert(a.prototype === undefined);		// a is not a function
+
+// The following contradicts the article! Math.max is a function without a prototype.
+assert(typeof Math.max.prototype === 'undefined');
+assert(typeof Math.max === 'function');
+var max_can_be_constructor = true;
+
+try
+{
+	var m = new Math.max(0, 1);
+}
+catch(e)
+{
+	max_can_be_constructor = false;
+}
+
+assert(max_can_be_constructor === false);
+// End of contradictions.
+
+function A(name)
+{
+	this.name = name;
+};
+
+assert(typeof A === 'function'	);		// This is a function
+assert(typeof A.prototype === 'object');	// functions have prototype properties, but have no __proto__ object themselves.
+
+assert(typeof A.prototype === 'object');
+assert(typeof A.__proto__ === 'function');
+assert(A.prototype !== A.__proto__);
+
+var A_has_properties = false;
+for( var props in A )
+	A_has_properties = true;
+
+assert(A_has_properties === false);		// prototype and __proto__ are not normal properties
+
+var a2 = new A('sam');
+assert(a2.constructor === A);		// We used A as a constructor
+assert(a2.__proto__ === A.prototype);		// A's prototype object is used by objects it creates
+
+// Extend ALL objects who's __proto__ is A.prototype with a new method
+A.prototype.getGreeting = function() {
+return 'Hello, ' + this.name + '.';
+};
+
+var a3 = new A('alice');
+assert(a3.getGreeting() === 'Hello, alice.');	// A's constructor is still using the same prototype object for all objects it creates
+
+A.prototype.x = 42;	// Adds a new property to ALL objects using __proto__ === A.prototype
+assert(a3.x === 42);
+
+A.prototype.x = 7;
+assert(a3.x === 7);
+
+A.prototype = { x: 42 };	// Create a NEW object and assign it to A's prototype property
+			// & give this new object a property named x
+
+assert(a3.x !== 42);	// __proto__ still points to the object that was assigned to it when it was constructed
+
+function B() { };
+
+assert(typeof B.prototype === 'object');
+assert(typeof B.prototype.constructor === 'function');
+
+assert(B.prototype.constructor === B);
+assert(B.prototype.constructor.prototype.constructor === B);
+assert(B.prototype === B.prototype.constructor.prototype);	// function can be its own prototype and constructor
+
+// The constructor property is not found using "for ... in"
+var B_prototype_has_properties = false;
+for( props in B.prototype )
+	B_prototype_has_properties = true;
+
+assert(B_prototype_has_properties === false);		// constructor is another non-standard or hidden property
+
+var b = new B();
+assert(b.constructor === B);		// B was used as the constructor
+
+assert(b instanceof B === true);
+b.__proto__ = { };
+assert(b instanceof B === false);	// instanceof climbs the __proto__ hierarchy
+
+var b2 = new B();
+assert(b2.__proto__ === B.prototype);		// These 2 point to the exact same object
+assert(b2.__proto__.__proto__ === B.prototype.__proto__);
+assert(b2.__proto__.__proto__.__proto__ === B.prototype.__proto__.__proto__);
+
+assert(B.prototype.__proto__.__proto__ === null);
+assert(B.prototype.__proto__ === Object.prototype);	// end of the line, the top of the tree
+assert(Object.prototype.__proto__ === null);
+
+</script>

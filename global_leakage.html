@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<p>
+Purpose:<br>
+Experiment with the leaking of varables to the global scope using and not using strict
+</p>
+
+<p>
+View source to see tests.
+</p>
+
+<hr>
+
+<script src="assert.js"></script>
+
+<script>
+// Implied Global Variables
+
+(function() {
+  "use strict";
+  try { a = 3; }	// normally this would leak to the global level
+  catch (e) { }
+
+  assert(typeof a === 'undefined');		// but doesn't when "use strict" is there
+}());
+
+(function() {
+  try { a = 3; }
+  catch (e) { }
+
+  assert(a === 3);	// leaks to global level in non-strict mode
+}());
+
+</script>
